@@ -1,61 +1,52 @@
 <template>
-  <article class="book-item">
-    <div class="book-main" v-if="!isEditing">
+  <article class="book-card" v-if="!isEditing">
+    <div class="book-content">
       <h3 class="book-title">{{ book.title }}</h3>
       <p class="book-author">by {{ book.author }}</p>
-      <p class="book-meta">
-        <span v-if="book.year">{{ book.year }}</span>
-        <span v-if="book.year && book.genre"> • </span>
-        <span v-if="book.genre">{{ book.genre }}</span>
-        <span v-if="(book.year || book.genre) && book.pages"> • </span>
-        <span v-if="book.pages">{{ book.pages }} pages</span>
-      </p>
-    </div>
-
-    <div class="book-main" v-else>
-      <div class="edit-row">
-        <label>
-          Title
-          <input v-model="editTitle" type="text" />
-        </label>
-        <label>
-          Author
-          <input v-model="editAuthor" type="text" />
-        </label>
-      </div>
-      <div class="edit-row">
-        <label>
-          Genre
-          <input v-model="editGenre" type="text" />
-        </label>
-        <label>
-          Year
-          <input v-model="editYear" type="number" />
-        </label>
-        <label>
-          Pages
-          <input v-model="editPages" type="number" />
-        </label>
+      <div class="book-meta">
+        <span class="genre-badge">{{ book.genre }}</span>
+        <span class="meta-dot">•</span>
+        <span>{{ book.year }}</span>
+        <span class="meta-dot">•</span>
+        <span>{{ book.pages }} pages</span>
       </div>
     </div>
-
-    <div class="book-actions" v-if="!isEditing">
-      <!-- This is where the favorite/star UI will go in the exercise -->
-      <button type="button" class="edit-button" @click="startEdit">
-        Edit
-      </button>
-      <button type="button" class="delete-button" @click="$emit('delete')">
-        Delete
-      </button>
+    <div class="book-actions">
+      <button type="button" class="action-btn edit-btn" @click="startEdit">Edit</button>
+      <button type="button" class="action-btn delete-btn" @click="$emit('delete')">Delete</button>
     </div>
+  </article>
 
-    <div class="book-actions" v-else>
-      <button type="button" class="save-button" @click="saveEdit">
-        Save
-      </button>
-      <button type="button" class="cancel-button" @click="cancelEdit">
-        Cancel
-      </button>
+  <article class="book-card edit-mode" v-else>
+    <div class="edit-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Title</label>
+          <input v-model="editTitle" type="text" placeholder="e.g. The Hobbit" />
+        </div>
+        <div class="form-field">
+          <label>Author</label>
+          <input v-model="editAuthor" type="text" placeholder="e.g. J.R.R. Tolkien" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Genre</label>
+          <input v-model="editGenre" type="text" placeholder="e.g. Fantasy" />
+        </div>
+        <div class="form-field">
+          <label>Year</label>
+          <input v-model="editYear" type="number" placeholder="2025" />
+        </div>
+        <div class="form-field">
+          <label>Pages</label>
+          <input v-model="editPages" type="number" placeholder="0" />
+        </div>
+      </div>
+    </div>
+    <div class="book-actions">
+      <button type="button" class="action-btn save-btn" @click="saveEdit">Save</button>
+      <button type="button" class="action-btn cancel-btn" @click="cancelEdit">Cancel</button>
     </div>
   </article>
 </template>
@@ -125,96 +116,159 @@ function saveEdit() {
 </script>
 
 <style scoped>
-.book-item {
+.book-card {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: 6px;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: box-shadow 0.2s;
 }
 
-.book-main {
+.book-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.book-content {
   flex: 1;
   min-width: 0;
 }
 
 .book-title {
-  margin: 0;
-  font-size: 1rem;
+  margin: 0 0 0.25rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
 }
 
 .book-author {
-  margin: 0.1rem 0 0;
-  font-size: 0.9rem;
-  color: #666;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .book-meta {
-  margin: 0.15rem 0 0;
-  font-size: 0.85rem;
-  color: #777;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.genre-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.meta-dot {
+  color: #d1d5db;
 }
 
 .book-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.edit-row {
-  display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.3rem;
+  margin-left: 1rem;
 }
 
-.edit-row label {
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.edit-btn:hover {
+  background: #e5e7eb;
+}
+
+.delete-btn {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.delete-btn:hover {
+  background: #fecaca;
+}
+
+.save-btn {
+  background: #1f2937;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #111827;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Edit mode styles */
+.edit-mode {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.edit-form {
   display: flex;
   flex-direction: column;
-  font-size: 0.8rem;
-  min-width: 120px;
+  gap: 1rem;
 }
 
-.edit-row input {
-  margin-top: 0.15rem;
-  padding: 0.25rem 0.35rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.form-row {
+  display: flex;
+  gap: 1rem;
 }
 
-.edit-button,
-.delete-button,
-.save-button,
-.cancel-button {
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  border: 1px solid transparent;
+.form-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
 }
 
-.edit-button {
-  border-color: #888;
-  background-color: #f5f5f5;
+.form-field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
 }
 
-.delete-button {
-  border-color: #cc0000;
-  background-color: #cc0000;
-  color: white;
+.form-field input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
 }
 
-.save-button {
-  border-color: #0077cc;
-  background-color: #0077cc;
-  color: white;
+.form-field input:focus {
+  outline: none;
+  border-color: #3b82f6;
 }
 
-.cancel-button {
-  border-color: #888;
-  background-color: #f5f5f5;
+.edit-mode .book-actions {
+  justify-content: flex-end;
+  margin-left: 0;
 }
 </style>
