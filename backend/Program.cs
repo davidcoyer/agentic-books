@@ -31,28 +31,56 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors();
 
-app.MapGet("/books", async (AppDbContext db) =>
-    await db.Books.ToListAsync());
-
-app.MapGet("/books/{id}", async (int id, AppDbContext db) =>
-    await db.Books.FindAsync(id)
-        is Book book
-            ? Results.Ok(book)
-            : Results.NotFound());
-
-app.MapPost("/books", async (Book book, AppDbContext db) =>
+app.MapGet("/books", async (HttpContext context, AppDbContext db) =>
 {
+    if (!int.TryParse(context.Request.Headers["X-User-Id"], out int userId))
+    {
+        return Results.BadRequest("Missing or invalid X-User-Id header");
+    }
+    return Results.Ok(await db.Books.Where(b => b.UserId == userId).ToListAsync());
+});
+
+app.MapGet("/books/{id}", async (int id, HttpContext context, AppDbContext db) =>
+{
+    if (!int.TryParse(context.Request.Headers["X-User-Id"], out int userId))
+    {
+        return Results.BadRequest("Missing or invalid X-User-Id header");
+    }
+
+    var book = await db.Books.FindAsync(id);
+
+    if (book is null || book.UserId != userId)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(book);
+});
+
+app.MapPost("/books", async (Book book, HttpContext context, AppDbContext db) =>
+{
+    if (!int.TryParse(context.Request.Headers["X-User-Id"], out int userId))
+    {
+        return Results.BadRequest("Missing or invalid X-User-Id header");
+    }
+
+    book.UserId = userId;
     db.Books.Add(book);
     await db.SaveChangesAsync();
 
     return Results.Created($"/books/{book.Id}", book);
 });
 
-app.MapPut("/books/{id}", async (int id, Book inputBook, AppDbContext db) =>
+app.MapPut("/books/{id}", async (int id, Book inputBook, HttpContext context, AppDbContext db) =>
 {
+    if (!int.TryParse(context.Request.Headers["X-User-Id"], out int userId))
+    {
+        return Results.BadRequest("Missing or invalid X-User-Id header");
+    }
+
     var book = await db.Books.FindAsync(id);
 
-    if (book is null) return Results.NotFound();
+    if (book is null || book.UserId != userId) return Results.NotFound();
 
     book.Title = inputBook.Title;
     book.Author = inputBook.Author;
@@ -65,19 +93,46 @@ app.MapPut("/books/{id}", async (int id, Book inputBook, AppDbContext db) =>
     return Results.NoContent();
 });
 
-app.MapDelete("/books/{id}", async (int id, AppDbContext db) =>
+app.MapDelete("/books/{id}", async (int id, HttpContext context, AppDbContext db) =>
 {
-    if (await db.Books.FindAsync(id) is Book book)
+    if (!int.TryParse(context.Request.Headers["X-User-Id"], out int userId))
     {
-        db.Books.Remove(book);
-        await db.SaveChangesAsync();
-        return Results.NoContent();
+        return Results.BadRequest("Missing or invalid X-User-Id header");
     }
 
-    return Results.NotFound();
+    var book = await db.Books.FindAsync(id);
+
+    if (book is null || book.UserId != userId)
+    {
+        return Results.NotFound();
+    }
+
+    db.Books.Remove(book);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
 });
 
 app.MapGet("/", () => "Welcome to the Book API! Try /books to see the list of books.");
+
+// Seed data
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    if (!db.Books.Any())
+    {
+        var books = new List<Book>();
+        for (int i = 1; i <= 10; i++)
+        {
+            books.Add(new Book { Title = "The Great Gatsby", Author = "F. Scott Fitzgerald", Genre = "Classic", Year = 1925, Pages = 180, UserId = i });
+            books.Add(new Book { Title = "To Kill a Mockingbird", Author = "Harper Lee", Genre = "Classic", Year = 1960, Pages = 281, UserId = i });
+            books.Add(new Book { Title = "1984", Author = "George Orwell", Genre = "Dystopian", Year = 1949, Pages = 328, UserId = i });
+            books.Add(new Book { Title = "Pride and Prejudice", Author = "Jane Austen", Genre = "Romance", Year = 1813, Pages = 279, UserId = i });
+            books.Add(new Book { Title = "The Hobbit", Author = "J.R.R. Tolkien", Genre = "Fantasy", Year = 1937, Pages = 310, UserId = i });
+        }
+        db.Books.AddRange(books);
+        db.SaveChanges();
+    }
+}
 
 app.Run();
 

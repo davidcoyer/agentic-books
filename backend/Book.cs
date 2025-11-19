@@ -10,5 +10,6 @@ namespace backend
         public string? Genre { get; set; }
         public int? Year { get; set; }
         public int? Pages { get; set; }
+        public int UserId { get; set; }
     }
 }

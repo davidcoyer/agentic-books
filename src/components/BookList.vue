@@ -2,6 +2,7 @@
   <section class="book-list">
     <div class="book-list-header">
       <h2>Books</h2>
+      <div class="user-badge">User ID: {{ userId }}</div>
     </div>
 
     <div class="book-list-content">
@@ -81,9 +82,11 @@ import {
   fetchBooks,
   addBookInMemory,
   updateBookInMemory,
-  deleteBookInMemory
+  deleteBookInMemory,
+  USER_ID
 } from '../services/bookService'
 
+const userId = USER_ID
 const books = ref([])
 const isLoading = ref(true)
 const searchTerm = ref('')
@@ -176,6 +179,18 @@ function handleUpdate(updatedBook) {
 
 .book-list-header {
   margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-badge {
+  background-color: #e0e0e0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .book-list-content {
