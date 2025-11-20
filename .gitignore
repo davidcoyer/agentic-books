@@ -33,5 +33,3 @@ obj/
 # Claude Code
 .claude/tasks/*
 !.claude/tasks/.gitkeep
-.claude/references/*
-!.claude/references/.gitkeep
