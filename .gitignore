@@ -29,3 +29,9 @@ obj/
 .vscode/
 *.user
 *.lock.json
+
+# Claude Code
+.claude/tasks/*
+!.claude/tasks/.gitkeep
+.claude/references/*
+!.claude/references/.gitkeep

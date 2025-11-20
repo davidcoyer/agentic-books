@@ -1,0 +1,3 @@
+You will invoke the `feature-planner` sub-agent to review any documentation found in the `.claude/references/#$ARGUMENTS/` directory. It should be instructed that its task name is `#$ARGUMENTS`. When that agent has completed its plan, invoke the `architecture-plan-refiner` agent, telling it to thoroughly review the plan found at `.claude/tasks/#$ARGUMENTS.md` and provide feedback.
+
+You will provide any feedback to the `feature-planner` agent, asking it to revise the work based on the feedback. Upon completion, invoke the `architecture-plan-refiner` to review and provide feedback or approve the changes. Continue this cycle until the `architecture-plan-refiner` has approved the plan, then return a summary of the work done to the end user.
